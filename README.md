@@ -66,3 +66,40 @@ The FuzzyHive library contains various component modules exposing different clas
 - fequals (in particular FuzzyEquals) -- a function that determines the degree of equality of two fuzzy sets; it is especially useful while performing a fuzzy join on dimensional attributes,
 - other functions that are dynamically created by code generator for the declared and defined linguistic values (e.g., BMI_Low} and BMI_Normal for the sample JSON file presented before.    
 
+Fuzzy filtering
+```SQL
+SELECT * 
+FROM pima_diabetes 
+WHERE around(bmi,26.5,28,28,29.5) > 0.7;
+```
+
+Filtering with a linguistic variable
+```SQL
+select * ,bmi_underweight(bmi) from pima_diabetes where bmi_underweight(bmi) > 0.7;
+```
+
+Grouping with a linguistic variable
+```SQL
+select bmi_gr.bmi_group, count(*) as count from (select *,  bmiToLing(bmi) as bmi_group from pima_diabetes) bmi_gr group by bmi_gr.bmi_group; 
+```
+
+Filtering with a simple logical expression
+```SQL
+select * from pima_diabetes where fuzzyor(around(bmi, 27,28,28,29), around(age, 45,50,50,55)) > 0.7;
+```
+
+Filtering with complex logical expressions 
+```SQL
+select * from pima_diabetes where fuzzyor(fuzzyand(bmi_normal(bmi), glucose_normal(glucose)), fuzzyor(bmi_obese(bmi), bmi_underweight(bmi)))> 0.7;
+```
+
+Fuzzy join with a linguistic variable 
+```SQL
+select * from (select *, bmiToLing(bmi) gr from pima_diabetes) data join nhs_survey r on data.gr = r.bmi_cat ; 
+```
+
+Fuzzy join through fuzzy numbers
+```SQL
+select diabetes.bmi, survey.bmi, fequals(diabetes.bmi, 2, survey.bmi, 1) as memberDegree, diabetes.glucose as glucose, diabetes.insulin as insulin, survey.chol as cholesterol, survey.pulse as pulse from pima_diabetes_1000 diabetes join (select * from  nhs_data ) survey  where fequals(diabetes.bmi, 2, survey.bmi, 1)> 0.7;
+```
+```
