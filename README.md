@@ -57,6 +57,8 @@ create function BMI_Normal as "fuzzy_hive.bmi.Normal";
 ...
 ```
 
+B. The most important modules and functions provided by FuzzyHive library
+
 The FuzzyHive library contains various component modules exposing different classes, functions, and data types for fuzzy data processing. The most important are as follows:
 - TrapezoidalMembershipFunction -- a class that allows creating trapezoidal and triangular membership functions to represent particular fuzzy sets or fuzzy values; it is especially useful when defining linguistic values for linguistic variables in JSON files,
 - Around -- a function which assesses how much a given numeric value of the dimensional attribute matches to a fuzzy value represented by a trapezoidal membership function,
@@ -66,7 +68,10 @@ The FuzzyHive library contains various component modules exposing different clas
 - fequals (in particular FuzzyEquals) -- a function that determines the degree of equality of two fuzzy sets; it is especially useful while performing a fuzzy join on dimensional attributes,
 - other functions that are dynamically created by code generator for the declared and defined linguistic values (e.g., BMI_Low} and BMI_Normal for the sample JSON file presented before.    
 
+C. Sample queries in FuzzyHQL:
+
 Fuzzy filtering
+Display patients with BMI around 28 with minimum membership degree greater than 0.7.
 ```SQL
 SELECT * 
 FROM pima_diabetes 
@@ -74,32 +79,53 @@ WHERE around(bmi,26.5,28,28,29.5) > 0.7;
 ```
 
 Filtering with a linguistic variable
+Find all patients who are underweight with minimum membership degree greater than 0.7. Show the membership degree. 
 ```SQL
-select * ,bmi_underweight(bmi) from pima_diabetes where bmi_underweight(bmi) > 0.7;
+SELECT *, bmi_underweight(bmi) 
+FROM pima_diabetes 
+WHERE bmi_underweight(bmi) > 0.7;
 ```
 
 Grouping with a linguistic variable
+Show me the number of patients in particular (fuzzy) groups of the BMI index. Linguistic variable must be compiled with the FuzzyHive library (here it is returned by the bmiToLing function, which processes the bmi attribute). 
 ```SQL
-select bmi_gr.bmi_group, count(*) as count from (select *,  bmiToLing(bmi) as bmi_group from pima_diabetes) bmi_gr group by bmi_gr.bmi_group; 
+SELECT bmi_gr.bmi_group, COUNT(*) as count 
+FROM (select *,  bmiToLing(bmi) as bmi_group from pima_diabetes) bmi_gr 
+GROUP BY bmi_gr.bmi_group; 
 ```
 
-Filtering with a simple logical expression
+Filtering with a simple logical expression fuzzyOr
+Find all patients with a BMI around 28 or age around 50.
 ```SQL
-select * from pima_diabetes where fuzzyor(around(bmi, 27,28,28,29), around(age, 45,50,50,55)) > 0.7;
+SELECT * 
+FROM pima_diabetes 
+WHERE fuzzyOr(around(bmi, 27,28,28,29), around(age, 45,50,50,55)) > 0.7;
 ```
 
 Filtering with complex logical expressions 
+Find all diabetes patients with (normal BMI and glucose) or (obese or underweight).
 ```SQL
-select * from pima_diabetes where fuzzyor(fuzzyand(bmi_normal(bmi), glucose_normal(glucose)), fuzzyor(bmi_obese(bmi), bmi_underweight(bmi)))> 0.7;
+SELECT * 
+FROM pima_diabetes 
+WHERE fuzzyOr(fuzzyAnd(bmi_normal(bmi), glucose_normal(glucose)), fuzzyOr(bmi_obese(bmi), bmi_underweight(bmi)))> 0.7;
 ```
 
 Fuzzy join with a linguistic variable 
+Show me the values of glucose (from pima_diabetes) and cholesterol (from nhs_data) for patients with similar BMI index (expressed by the same linguistic value).
 ```SQL
-select * from (select *, bmiToLing(bmi) gr from pima_diabetes) data join nhs_survey r on data.gr = r.bmi_cat ; 
+SELECT * 
+FROM (
+  SELECT *, bmiToLing(bmi) gr 
+  FROM pima_diabetes) data JOIN nhs_survey r 
+    ON data.gr = r.bmi_cat; 
 ```
 
 Fuzzy join through fuzzy numbers
+Show me the values of glucose (from pima_diabetes) and cholesterol (from nhs_data) for patients with similar BMI index (2 and 1 are left and right spreads for bmi from pima_diabetes and nhs_data)
 ```SQL
-select diabetes.bmi, survey.bmi, fequals(diabetes.bmi, 2, survey.bmi, 1) as memberDegree, diabetes.glucose as glucose, diabetes.insulin as insulin, survey.chol as cholesterol, survey.pulse as pulse from pima_diabetes_1000 diabetes join (select * from  nhs_data ) survey  where fequals(diabetes.bmi, 2, survey.bmi, 1)> 0.7;
+SELECT diabetes.bmi, survey.bmi, fequals(diabetes.bmi, 2, survey.bmi, 1) as memberDegree, 
+  diabetes.glucose as glucose, diabetes.insulin as insulin, survey.chol as cholesterol, survey.pulse as pulse 
+FROM pima_diabetes_1000 diabetes JOIN (select * from  nhs_data ) survey  
+WHERE fequals(diabetes.bmi, 2, survey.bmi, 1)> 0.7;
 ```
 ```
