@@ -71,6 +71,7 @@ The FuzzyHive library contains various component modules exposing different clas
 C. Sample queries in FuzzyHQL:
 
 Fuzzy filtering
+
 Display patients with BMI around 28 with minimum membership degree greater than 0.7.
 ```SQL
 SELECT * 
@@ -79,6 +80,7 @@ WHERE around(bmi,26.5,28,28,29.5) > 0.7;
 ```
 
 Filtering with a linguistic variable
+
 Find all patients who are underweight with minimum membership degree greater than 0.7. Show the membership degree. 
 ```SQL
 SELECT *, bmi_underweight(bmi) 
@@ -87,6 +89,7 @@ WHERE bmi_underweight(bmi) > 0.7;
 ```
 
 Grouping with a linguistic variable
+
 Show me the number of patients in particular (fuzzy) groups of the BMI index. Linguistic variable must be compiled with the FuzzyHive library (here it is returned by the bmiToLing function, which processes the bmi attribute). 
 ```SQL
 SELECT bmi_gr.bmi_group, COUNT(*) as count 
@@ -95,6 +98,7 @@ GROUP BY bmi_gr.bmi_group;
 ```
 
 Filtering with a simple logical expression fuzzyOr
+
 Find all patients with a BMI around 28 or age around 50.
 ```SQL
 SELECT * 
@@ -103,6 +107,7 @@ WHERE fuzzyOr(around(bmi, 27,28,28,29), around(age, 45,50,50,55)) > 0.7;
 ```
 
 Filtering with complex logical expressions 
+
 Find all diabetes patients with (normal BMI and glucose) or (obese or underweight).
 ```SQL
 SELECT * 
@@ -111,6 +116,7 @@ WHERE fuzzyOr(fuzzyAnd(bmi_normal(bmi), glucose_normal(glucose)), fuzzyOr(bmi_ob
 ```
 
 Fuzzy join with a linguistic variable 
+
 Show me the values of glucose (from pima_diabetes) and cholesterol (from nhs_data) for patients with similar BMI index (expressed by the same linguistic value).
 ```SQL
 SELECT * 
@@ -121,11 +127,11 @@ FROM (
 ```
 
 Fuzzy join through fuzzy numbers
+
 Show me the values of glucose (from pima_diabetes) and cholesterol (from nhs_data) for patients with similar BMI index (2 and 1 are left and right spreads for bmi from pima_diabetes and nhs_data)
 ```SQL
 SELECT diabetes.bmi, survey.bmi, fequals(diabetes.bmi, 2, survey.bmi, 1) as memberDegree, 
   diabetes.glucose as glucose, diabetes.insulin as insulin, survey.chol as cholesterol, survey.pulse as pulse 
 FROM pima_diabetes_1000 diabetes JOIN (select * from  nhs_data ) survey  
 WHERE fequals(diabetes.bmi, 2, survey.bmi, 1)> 0.7;
-```
 ```
