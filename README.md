@@ -13,6 +13,7 @@ A. Registering Library in Hive
 
 Before the FuzzyHive library can be used, it should be registered in the Hive environment. FuzzyHive library is delivered in the form of library source code that must be compiled to the .jar file. This allows to add custom, specialized and dedicated definitions of linguistic variables and their linguistic values. These definitions are stored in JSON files, like the one presented below. The compilation step can be skipped, if no custom definitions are added. 
 
+```JSON
 {
   "linguisticVariables" :[
     {
@@ -41,9 +42,10 @@ Before the FuzzyHive library can be used, it should be registered in the Hive en
         ...
   ]
 }
-
+```
 After compilation, the library should be registered in the Hive environment together with appropriate call specifications for all functions that will be invoked from the HiveQL queries. This step is shown below.
 
+```SQL
 add jar (*@\textit{absolute path to the file fuzzyhive-1.0.jar}@*);
 create function fuzzyOr as "functions.numeric.FuzzyOr";
 create function fuzzyAnd as "functions.numeric.FuzzyAnd";
@@ -53,6 +55,7 @@ create function membership as "fuzzy_model.GenericMembershipFunction";
 create function BMI_Low as "fuzzy_hive.bmi.Low";
 create function BMI_Normal as "fuzzy_hive.bmi.Normal";
 ...
+```
 
 The FuzzyHive library contains various component modules exposing different classes, functions, and data types for fuzzy data processing. The most important are as follows:
 - TrapezoidalMembershipFunction -- a class that allows creating trapezoidal and triangular membership functions to represent particular fuzzy sets or fuzzy values; it is especially useful when defining linguistic values for linguistic variables in JSON files,
