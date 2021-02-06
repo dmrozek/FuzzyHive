@@ -112,7 +112,10 @@ Find all diabetes patients with (normal BMI and glucose) or (obese or underweigh
 ```SQL
 SELECT * 
 FROM pima_diabetes 
-WHERE fuzzyOr(fuzzyAnd(bmi_normal(bmi), glucose_normal(glucose)), fuzzyOr(bmi_obese(bmi), bmi_underweight(bmi)))> 0.7;
+WHERE fuzzyOr(
+        fuzzyAnd(bmi_normal(bmi), glucose_normal(glucose)), 
+        fuzzyOr(bmi_obese(bmi), bmi_underweight(bmi))
+        )> 0.7;
 ```
 
 Fuzzy join with a linguistic variable 
@@ -131,7 +134,8 @@ Fuzzy join through fuzzy numbers
 Show me the values of glucose (from pima_diabetes) and cholesterol (from nhs_data) for patients with similar BMI index (2 and 1 are left and right spreads for bmi from pima_diabetes and nhs_data)
 ```SQL
 SELECT diabetes.bmi, survey.bmi, fequals(diabetes.bmi, 2, survey.bmi, 1) as memberDegree, 
-  diabetes.glucose as glucose, diabetes.insulin as insulin, survey.chol as cholesterol, survey.pulse as pulse 
+  diabetes.glucose as glucose, diabetes.insulin as insulin, 
+  survey.chol as cholesterol, survey.pulse as pulse 
 FROM pima_diabetes_1000 diabetes JOIN (select * from  nhs_data ) survey  
 WHERE fequals(diabetes.bmi, 2, survey.bmi, 1)> 0.7;
 ```
